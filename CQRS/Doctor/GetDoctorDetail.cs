@@ -8,23 +8,23 @@ namespace PGCare.CQRS.Doctor
 {
 
     #region Interface
-    public interface IGetDoctorsList
+    public interface IGetDoctorDetail
     {
-        Task<List<DoctorVM>> Execute();
+        Task<List<DoctorVM>> Execute(string doctorId);
     }
     #endregion
 
-    public class GetDoctorsList : IGetDoctorsList
+    public class GetDoctorDetail : IGetDoctorDetail
     {
         public readonly PGCareContext _context;
-        public GetDoctorsList(PGCareContext context)
+        public GetDoctorDetail(PGCareContext context)
         {
             _context = context;
         }
 
-        public async Task<List<DoctorVM>> Execute()
+        public async Task<List<DoctorVM>> Execute(string doctorId)
         {
-            return await _context.Doctors.Find(_ => true).Project(x => new DoctorVM
+            return await _context.Doctors.Find(x => x.Id == doctorId).Project(x => new DoctorVM
             {
                 DoctorId = x.Id,
                 DoctorName = x.DoctorName,
