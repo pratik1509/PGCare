@@ -1,7 +1,18 @@
-namespace PGCare.Models {
-    public class Medicine : BaseModel {
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+
+namespace PGCare.Models
+{
+    public class Medicine : BaseModel
+    {
+        [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)]
         public string ScheduleCategoryId { get; set; }
+        [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)]
         public string MedicineCategoryId { get; set; }
+        [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)]
         public string MedicineCommodityId { get; set; }
         public string Name { get; set; }
         public string GenericName { get; set; }
@@ -13,6 +24,6 @@ namespace PGCare.Models {
         public double AdditionalTax { get; set; }
         public double IGST { get; set; }
         public double CGST { get; set; }
-        public double SGST { get; set; }        
+        public double SGST { get; set; }
     }
 }

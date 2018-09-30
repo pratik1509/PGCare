@@ -1,5 +1,12 @@
-namespace PGCare.Models {
-    public class Stock : BaseModel {
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+
+namespace PGCare.Models
+{
+    public class Stock : BaseModel
+    {
+        [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)]
         public string MedicineId { get; set; }
         public string BatchNo { get; set; }
         public string ExpiryDate { get; set; }

@@ -1,12 +1,18 @@
 using System.Collections.Generic;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 
-namespace PGCare.Models {
-    public class Purchase : BaseModel {
+namespace PGCare.Models
+{
+    public class Purchase : BaseModel
+    {
+        [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)]
         public string WholeSellerId { get; set; }
         public string InvoiceNo { get; set; }
         public string InvoiceValue { get; set; }
         public string InvoiceDate { get; set; }
-        public PaymentStatus PaymentStatus { get; set; }        
+        public PaymentStatus PaymentStatus { get; set; }
         public string LastPaymentDate { get; set; } //stores last payment date only, overwrite earlier payment date
         public string ChequeNo { get; set; }
         public string ChequeDate { get; set; }
@@ -16,7 +22,10 @@ namespace PGCare.Models {
         public List<PurchaseMedicine> Medicines { get; set; }
     }
 
-    public class PurchaseMedicine {
+    public class PurchaseMedicine
+    {
+        [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)]
         public string MedicineId { get; set; }
         public string BatchNo { get; set; }
         public string ExpiryDate { get; set; }
