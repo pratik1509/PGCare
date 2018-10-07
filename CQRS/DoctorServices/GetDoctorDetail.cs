@@ -4,32 +4,33 @@ using MongoDB.Driver;
 using PGCare.CQRS.Context;
 using PGCare.ViewModels;
 
-namespace PGCare.CQRS.Doctor
+namespace PGCare.CQRS.DoctorServices
 {
 
     #region Interface
     public interface IGetDoctorDetail
     {
-        Task<List<DoctorVM>> Execute(string doctorId);
+        Task<DoctorVM> Execute(string doctorId);
     }
     #endregion
 
     public class GetDoctorDetail : IGetDoctorDetail
     {
-        public readonly PGCareContext _context;
-        public GetDoctorDetail(PGCareContext context)
+        private readonly PGCareContext _db;
+
+        public GetDoctorDetail(PGCareContext db)
         {
-            _context = context;
+            _db = db;
         }
 
-        public async Task<List<DoctorVM>> Execute(string doctorId)
+        public async Task<DoctorVM> Execute(string doctorId)
         {
-            return await _context.Doctors.Find(x => x.Id == doctorId).Project(x => new DoctorVM
+            return await _db.Doctors.Find(x => x.Id == doctorId).Project(x => new DoctorVM
             {
                 DoctorId = x.Id,
                 DoctorName = x.DoctorName,
                 Address = x.Address
-            }).ToListAsync();
+            }).FirstOrDefaultAsync();
         }
     }
 }

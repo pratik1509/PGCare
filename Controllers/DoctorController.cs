@@ -2,15 +2,14 @@ using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using PGCare.CQRS.Doctor;
+using PGCare.CQRS.DoctorServices;
 using PGCare.ViewModels;
 using PGCare.Filters.DoctorFilters;
 using PGCare.Filters;
 
 namespace PGCare.Controllers
 {
-    [Produces("application/json")]
-    [Route("api/[Controller]")]
+    [Route("api/[controller]")]
     public class DoctorController : Controller
     {
         #region dependencies
@@ -32,11 +31,8 @@ namespace PGCare.Controllers
             _deleteDoctor = deleteDoctor;
         }
 
-        [HttpGet("{id}")]
-        [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        [ProducesResponseType(typeof(DoctorVM), (int)HttpStatusCode.OK)]
-        [ValidateDoctorExistsAttribute]
-        public async Task<IActionResult> Get([FromRoute] string id)
+        [HttpGet("{id}")]        
+        public async Task<ActionResult<DoctorVM>> Get([FromRoute] string id)
         {
             var doctor = await _getDoctorDetail.Execute(id);
 
@@ -45,25 +41,29 @@ namespace PGCare.Controllers
                 return NotFound();
             }
 
-            return Ok(doctor);
+            return doctor;
         }
 
-        [HttpGet]
-        [ProducesResponseType(typeof(List<DoctorVM>), (int)HttpStatusCode.OK)]
-        public async Task<IActionResult> GetAll()
+        [HttpGet]      
+        public async Task<ActionResult<DoctorVM>> GetAll()
         {
             return Ok(await _getDoctorsList.Execute());
         }
 
         [HttpPost]
-        [ProducesResponseType(typeof(IDictionary<string, string>), (int)HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(DoctorVM), (int)HttpStatusCode.Created)]
-        public async Task<IActionResult> AddUpdate([FromBody] DoctorVM doctor)
+        [ValidateModelAttribute]
+        public async Task<ActionResult<string>> Add([FromBody] DoctorVM doctor)
         {
+            var doctorId = await _addUpdateDoctor.Execute(new Models.Doctor
+            {
+                DoctorName = doctor.DoctorName,
+                Address = doctor.Address
+            });
 
-            return CreatedAtAction("GetAll", null);
+            return CreatedAtAction("Get", new { id = doctorId });
         }
 
+        [HttpPut]      
         public async Task<IActionResult> Delete(string doctorId)
         {
             var isDeleted = await _deleteDoctor.Execute(doctorId);

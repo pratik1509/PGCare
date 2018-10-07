@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using MongoDB.Driver;
 using PGCare.CQRS.Context;
+using PGCare.Helpers;
+using PGCare.ViewModels;
 
 namespace PGCare.Filters.DoctorFilters
 {
@@ -11,7 +13,7 @@ namespace PGCare.Filters.DoctorFilters
         public ValidateDoctorExistsAttribute() : base(typeof(ValidateDoctorExistsFilterImpl))
         {
         }
-        private class ValidateDoctorExistsFilterImpl : IAsyncActionFilter
+        private class ValidateDoctorExistsFilterImpl : PGCareBaseController, IAsyncActionFilter
         {
             private readonly PGCareContext _dbContext;
             public ValidateDoctorExistsFilterImpl(PGCareContext dbContext)
@@ -19,7 +21,7 @@ namespace PGCare.Filters.DoctorFilters
                 _dbContext = dbContext;
             }
 
-            public async Task OnActionExecutionAsync(ActionExecutingContext context,
+            public override async Task OnActionExecutionAsync(ActionExecutingContext context,
             ActionExecutionDelegate next)
             {
                 if (context.ActionArguments.ContainsKey("id"))
@@ -30,7 +32,11 @@ namespace PGCare.Filters.DoctorFilters
                     {
                         if (_dbContext.Doctors.Find(x => x.Id == id).CountDocuments() == 0)
                         {
-                            context.Result = new NotFoundObjectResult(id);
+                            context.Result =
+                                new BadRequestObjectResult(
+                                    Failure(System.Net.HttpStatusCode.BadRequest,
+                                    "Doctor not found."));
+
                             return;
                         }
                     }

@@ -1,6 +1,7 @@
+using PGCare.CQRS.Context;
 using System.Threading.Tasks;
 
-namespace PGCare.CQRS.Doctor
+namespace PGCare.CQRS.DoctorServices
 {
 
     #region Interface
@@ -10,8 +11,11 @@ namespace PGCare.CQRS.Doctor
     #endregion
 
     public class DeleteDoctor : IDeleteDoctor {
-        public DeleteDoctor () {
 
+        private readonly IPGCareContext _db;
+
+        public DeleteDoctor (IPGCareContext db) {
+            _db = db;
         }
 
         public async Task<bool> Execute (string doctorId) {

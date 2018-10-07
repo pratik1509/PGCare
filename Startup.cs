@@ -4,6 +4,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SpaServices.Webpack;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using NJsonSchema;
+using NSwag.AspNetCore;
+using PGCare.CQRS.Context;
+using PGCare.CQRS.DoctorServices;
+using System.Reflection;
 
 namespace PGCare
 {
@@ -18,10 +23,12 @@ namespace PGCare
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
-        {
+        {            
             // Add framework services.
             services.AddMvc()
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+
+            services.AddSwagger();
 
             // configuring connection to PGCare database
             services.Configure<Settings>(
@@ -31,8 +38,19 @@ namespace PGCare
                     options.Database = Configuration.GetSection("MongoDb:Database").Value;
                 });
 
-            // Simple example with dependency injection for a data provider.
-            services.AddSingleton<Providers.IWeatherProvider, Providers.WeatherProviderFake>();
+            // var settings = Configuration.GetSection("Root:MongoDB").Get<Settings>();
+            services.Configure<Settings>(options => Configuration.GetSection("MongoDB").Bind(options));
+
+            //db context
+            services.AddSingleton<IPGCareContext, PGCareContext>();
+
+            var db =
+                new PGCareContext(Configuration["MongoDB:ConnectionString"], Configuration["MongoDB:Database"]);
+            //doctor services
+            services.AddScoped<IAddUpdateDoctor>(s => new AddUpdateDoctor(db));
+            services.AddScoped<IDeleteDoctor>(s => new DeleteDoctor(db));
+            services.AddScoped<IGetDoctorDetail>(s => new GetDoctorDetail(db));
+            services.AddScoped<IGetDoctorsList>(s => new GetDoctorsList(db));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -53,6 +71,12 @@ namespace PGCare
                 app.UseExceptionHandler("/Home/Error");
             }
 
+            app.UseSwaggerUi3WithApiExplorer(settings =>
+            {
+                settings.GeneratorSettings.DefaultPropertyNameHandling =
+                    PropertyNameHandling.CamelCase;
+            });
+
             app.UseStaticFiles();
 
             app.UseMvc(routes =>
@@ -60,11 +84,16 @@ namespace PGCare
                 routes.MapRoute(
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
-
-                routes.MapSpaFallbackRoute(
-                    name: "spa-fallback",
-                    defaults: new { controller = "Home", action = "Index" });
             });
+
+            app.MapWhen(a => !a.Request.Path.Value.StartsWith("/swagger"), builder =>
+                builder.UseMvc(routes =>
+                {
+                    routes.MapSpaFallbackRoute(
+                        name: "spa-fallback",
+                        defaults: new { controller = "Home", action = "Index" });
+                })
+            );
         }
     }
 }
