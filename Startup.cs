@@ -8,6 +8,7 @@ using NJsonSchema;
 using NSwag.AspNetCore;
 using PGCare.CQRS.Context;
 using PGCare.CQRS.DoctorServices;
+using PGCare.Filters.DoctorFilters;
 using System.Reflection;
 
 namespace PGCare
@@ -46,6 +47,7 @@ namespace PGCare
 
             var db =
                 new PGCareContext(Configuration["MongoDB:ConnectionString"], Configuration["MongoDB:Database"]);
+                      
             //doctor services
             services.AddScoped<IAddUpdateDoctor>(s => new AddUpdateDoctor(db));
             services.AddScoped<IDeleteDoctor>(s => new DeleteDoctor(db));

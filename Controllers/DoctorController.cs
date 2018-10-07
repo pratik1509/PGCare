@@ -31,7 +31,7 @@ namespace PGCare.Controllers
             _deleteDoctor = deleteDoctor;
         }
 
-        [HttpGet("{id}")]        
+        [HttpGet("{id}")]
         public async Task<ActionResult<DoctorVM>> Get([FromRoute] string id)
         {
             var doctor = await _getDoctorDetail.Execute(id);
@@ -44,7 +44,7 @@ namespace PGCare.Controllers
             return doctor;
         }
 
-        [HttpGet]      
+        [HttpGet]
         public async Task<ActionResult<DoctorVM>> GetAll()
         {
             return Ok(await _getDoctorsList.Execute());
@@ -63,10 +63,10 @@ namespace PGCare.Controllers
             return CreatedAtAction("Get", new { id = doctorId });
         }
 
-        [HttpPut]      
-        public async Task<IActionResult> Delete(string doctorId)
+        [HttpPut]
+        public async Task<IActionResult> Delete(string id)
         {
-            var isDeleted = await _deleteDoctor.Execute(doctorId);
+            var isDeleted = await _deleteDoctor.Execute(id);
             return new JsonResult(new Result { IsSucccess = isDeleted });
         }
     }
